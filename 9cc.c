@@ -92,12 +92,26 @@ Token *tokenize(char *p) {
   return head.next;
 }
 
+//エラー箇所特定用のコード
+char *user_input;//入力プログラム
+void error_at(char *loc, char *fmt, ...) { 
+  va_list ap;
+  va_start(ap, fmt);
+  int pos = loc - user_input;//なん文字目のエラー家の特定
+  fprintf(stderr, "%s\n", user_input);
+  fprintf(stderr, "%*s", pos, "");//pos個の空白
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+  exit(1);
+}
+
 int main(int argc, char **argv) {
   if (argc != 2) {
     error("引数の個数が正しくありません。");
     return 1;
   }
   token = tokenize(argv[1]);
+  user_input = argv[1];
   printf(".intel_syntax noprefix\n");
   printf(".global main\n");
   printf("main:\n");
