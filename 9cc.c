@@ -104,7 +104,80 @@ void error_at(char *loc, char *fmt, ...) {
   fprintf(stderr, "\n");
   exit(1);
 }
-
+//抽象構文木作るよ〜
+//抽象構文木のノード
+typedef enum{
+    ND_ADD,//+
+    ND_SUB,//-
+    ND_MUL,//X
+    ND_DIV,// /
+    ND_NUM,
+}NodeKind;
+//ノードの構造
+typedef struct Node Node;
+struct Node{
+    NodeKind kind;
+    Node *lhs;
+    Node *rhs;
+    int val;
+};
+//ノード生成
+Node* expr();
+Node* primary();
+Node* mul();
+Node* new_node(NodeKind kind,Node* lhs,Node* rhs){
+    Node *node=calloc(1,sizeof(Node));
+    node->lhs=lhs;
+    node->rhs=rhs;
+    node->kind=kind;
+    return node;
+}
+//数字の登録
+Node* new_node_num(int val){
+    Node *node=calloc(1,sizeof(Node));
+    node->kind=ND_NUM;
+    node->val=val;
+    node->lhs=NULL;
+    node->rhs=NULL;
+    return node; 
+    
+}
+Node* expr(){
+    //expr=mul(+mul | -mul)*
+    Node* node=mul();
+    for(;;){
+        if(consume('+')){
+            node=new_node(ND_ADD,node,mul());
+        }else if(consume('-')){
+            node=new_node(ND_SUB,node,mul());
+        }else{
+            return node;
+        }
+    }
+}
+Node *mul(){
+    //mul=primary('*'primary | '/'primary)*
+    Node* node=primary();
+    for(;;){
+        if(consume('*')){
+            node=new_node(ND_MUL,node,primary());
+        }else if(consume('/')){
+            node=primary(ND_DIV,node,primary());
+        }else{
+            return node;
+        }
+    }
+}
+Node* primary(){
+    //primary=num | "(" expr ")"
+    //次のトークンが（なら(expr)になる
+    if(consume('(')){
+        Node *node=expr();
+        expect(')');
+        return node;
+    }
+    return new_node_num(expect_number());
+}
 int main(int argc, char **argv) {
   if (argc != 2) {
     error("引数の個数が正しくありません。");
