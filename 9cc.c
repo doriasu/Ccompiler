@@ -77,13 +77,13 @@ Token *tokenize(char *p) {
       p++;
       continue;
     }
+    if (*p == '+' || *p == '-'||*p=='*'||*p=='/'||*p=='('||*p==')') {
+      cur = new_token(TK_RESERVED, cur, p++);
+      continue;
+    }
     if(isdigit(*p)){
       cur = new_token(TK_NUM, cur, p);
       cur->val = strtol(p, &p, 10);
-      continue;
-    }
-    if (*p == '+' || *p == '-') {
-      cur = new_token(TK_RESERVED, cur, p++);
       continue;
     }
     error("トークナイズできんが...");
@@ -162,7 +162,7 @@ Node *mul(){
         if(consume('*')){
             node=new_node(ND_MUL,node,primary());
         }else if(consume('/')){
-            node=primary(ND_DIV,node,primary());
+            node=new_node(ND_DIV,node,primary());
         }else{
             return node;
         }
@@ -178,6 +178,44 @@ Node* primary(){
     }
     return new_node_num(expect_number());
 }
+//構文解析木を実際にスタックマシンで計算してみる
+void gen(Node *node){
+    if(node->kind==ND_NUM){
+        printf("    push %d\n",node->val);
+        return;
+    }else if(node->kind==ND_ADD){
+        gen(node->lhs);
+        gen(node->rhs);
+        printf("    pop rax\n");
+        printf("    pop rdi\n");
+        printf("    add rax,rdi\n");
+        printf("    push rax\n");
+    }else if(node->kind==ND_SUB){
+        gen(node->lhs);
+        gen(node->rhs);
+        printf("    pop rdi\n");
+        printf("    pop rax\n");
+        printf("    sub rax,rdi\n");
+        printf("    push rax\n");
+    }else if(node->kind==ND_MUL){
+        gen(node->lhs);
+        gen(node->rhs);
+        printf("    pop rdi\n");
+        printf("    pop rax\n");
+        printf("    imul rax,rdi\n");
+        printf("    push rax\n");
+    }else if(node->kind==ND_DIV){
+        gen(node->lhs);
+        gen(node->rhs);
+        printf("    pop rdi\n");
+        printf("    pop rax\n");
+        printf("    cqo\n");
+        printf("    idiv rdi\n");
+        printf("    push rax\n");
+
+    }
+
+}
 int main(int argc, char **argv) {
   if (argc != 2) {
     error("引数の個数が正しくありません。");
@@ -185,23 +223,17 @@ int main(int argc, char **argv) {
   }
   token = tokenize(argv[1]);
   user_input = argv[1];
+  Node *node=expr();
+  //アセンブリの前半部分の出力
   printf(".intel_syntax noprefix\n");
   printf(".global main\n");
   printf("main:\n");
-  //式の始まりは数値でないと困る
-  printf("    mov rax,%d\n", expect_number());
-  while(!at_eof()){
-    //式の終わりでにない時ループ続行
-    if(consume('+')){
-      printf("  add rax,%d\n", expect_number());
-      continue;
-    }
-    if(consume('-')) { 
-      printf("  sub rax,%d\n", expect_number());
-      continue;
-    }
-  }
+  
+  //抽象構文木をいじいじ
+  gen(node);
 
-  printf("    ret\n");
+  //スタックトップに式全体の値が有るよ〜
+  printf("  pop rax\n");
+  printf("  ret\n");
   return 0;
 }
