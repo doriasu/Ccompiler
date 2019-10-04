@@ -35,6 +35,8 @@ void error(char *fmt, ...) {
 //真を返す。それ以外は義を返す
 bool consume(char *op){
   if(token->kind!=TK_RESERVED||strlen(op)!=token->len||memcmp(token->str,op,token->len)){
+      printf("う%s\n",token->str);
+      printf("し%s\n",op);
     return false;
   }
   token = token->next;
@@ -61,11 +63,13 @@ int expect_number(){
 }
 bool at_eof() { return token->kind == TK_EOF; }
 //新しいトークンを作成してcurにつなげる
-Token *new_token(TokenKind kind, Token *cur, char *str) {
+Token *new_token(TokenKind kind, Token *cur, char *str,int len) {
   Token *tok = calloc(1, sizeof(Token));
   cur->next = tok;
   tok->kind = kind;
   tok -> str = str;
+  tok->len=len;
+  printf("%s\n",str);
   return tok;
 }
 Token *tokenize(char *p) { 
@@ -79,17 +83,41 @@ Token *tokenize(char *p) {
       continue;
     }
     if (*p == '+' || *p == '-'||*p=='*'||*p=='/'||*p=='('||*p==')') {
-      cur = new_token(TK_RESERVED, cur, p++);
+      cur = new_token(TK_RESERVED, cur, p++,1);
       continue;
     }
+    if(*p=='>'){
+        if(*(p+1)=='='){
+            cur=new_token(TK_RESERVED,cur,p+=2,2);
+        }else{
+            cur=new_token(TK_RESERVED,cur,p++,1);
+        }
+        continue;
+    }
+    if(*p=='<'){
+        if(*(p+1)=='='){
+            cur=new_token(TK_RESERVED,cur,p+=2,2);
+        }else{
+            cur=new_token(TK_RESERVED,cur,p++,1);
+        }
+        continue;
+    }
+    if(*p=='='&&*(p+1)=='='){
+        cur=new_token(TK_RESERVED,cur,p+=2,2);
+        continue;
+    }
+     if(*p=='!'&&*(p+1)=='='){
+        cur=new_token(TK_RESERVED,cur,p+=2,2);
+        continue;
+    }
     if(isdigit(*p)){
-      cur = new_token(TK_NUM, cur, p);
+      cur = new_token(TK_NUM, cur, p,1);
       cur->val = strtol(p, &p, 10);
       continue;
     }
     error("トークナイズできんが...");
   }
-  new_token(TK_EOF, cur, p);
+  new_token(TK_EOF, cur, p,1);
   return head.next;
 }
 
@@ -111,7 +139,13 @@ typedef enum{
     ND_ADD,//+
     ND_SUB,//-
     ND_MUL,//X
-    ND_DIV,// /
+    ND_DIV,// 
+    ND_ONAJI,//==
+    ND_CHIGAU,//!=
+    ND_DAINARI,//>
+    ND_DAINARINARI,//>=
+    ND_SHONARI,//<
+    ND_SHONARINARI,//<=
     ND_NUM,
 }NodeKind;
 //ノードの構造
@@ -124,6 +158,8 @@ struct Node{
 };
 //ノード生成
 Node* expr();
+Node* relational();
+Node* add();
 Node* primary();
 Node* mul();
 Node* unary();
@@ -144,13 +180,46 @@ Node* new_node_num(int val){
     return node; 
     
 }
-Node* expr(){
+//nodeの生成
+Node *expr(){
+    //expr=relational("=="relational|"!="relational)
+    Node* node=relational();
+    for(;;){
+        if(consume("==")){
+            node=new_node(ND_ONAJI,node,relational());
+        }else if(consume("!=")){
+            node=new_node(ND_CHIGAU,node,relational());
+        }else{
+            return node;
+        }
+    }
+
+}
+Node *relational(){
+    //relational=add("<"add|"<="add|">"add|">="add)
+    Node* node=add();
+    for(;;){
+        if(consume("<")){
+            node=new_node(ND_SHONARI,node,add());
+        }else if(consume("<=")){
+            node=new_node(ND_SHONARINARI,node,add());
+        }else if(consume(">")){
+            node=new_node(ND_DAINARI,node,add());
+        }else if(consume(">=")){
+            node=new_node(ND_DAINARINARI,node,add());
+        }else{
+            return node;
+        }
+    }
+
+}
+Node* add(){
     //expr=mul(+mul | -mul)*
     Node* node=mul();
     for(;;){
-        if(consume('+')){
+        if(consume("+")){
             node=new_node(ND_ADD,node,mul());
-        }else if(consume('-')){
+        }else if(consume("-")){
             node=new_node(ND_SUB,node,mul());
         }else{
             return node;
@@ -161,9 +230,9 @@ Node *mul(){
     //mul=primary('*'primary | '/'primary)*
     Node* node=unary();
     for(;;){
-        if(consume('*')){
+        if(consume("*")){
             node=new_node(ND_MUL,node,unary());
-        }else if(consume('/')){
+        }else if(consume("/")){
             node=new_node(ND_DIV,node,unary());
         }else{
             return node;
@@ -173,7 +242,7 @@ Node *mul(){
 Node* primary(){
     //primary=num | "(" expr ")"
     //次のトークンが（なら(expr)になる
-    if(consume('(')){
+    if(consume("(")){
         Node *node=expr();
         expect(')');
         return node;
@@ -181,10 +250,10 @@ Node* primary(){
     return new_node_num(expect_number());
 }
 Node* unary(){
-    if(consume('+')){
+    if(consume("+")){
         return primary();
     }
-    if(consume('-')){
+    if(consume("-")){
         return new_node(ND_SUB,new_node_num(0),primary());
     }
     return primary();
@@ -224,7 +293,59 @@ void gen(Node *node){
         printf("    idiv rdi\n");
         printf("    push rax\n");
 
+    }else if(node->kind==ND_ONAJI){
+        gen(node->lhs);
+        gen(node->rhs);
+        printf("    pop rdi\n");
+        printf("    pop rax\n");
+        printf("    cmp rax,rdi\n");
+        printf("    sete al\n");
+        printf("    movzb rax,al\n");
+    }else if(node->kind==ND_CHIGAU){
+        gen(node->lhs);
+        gen(node->rhs);
+        printf("    pop rdi\n");
+        printf("    pop rax\n");
+        printf("    cmp rax,rdi\n");
+        printf("    setne al\n");
+        printf("    movzb rax,al\n");
+    }else if(node->kind==ND_SHONARI){
+        gen(node->lhs);
+        gen(node->rhs);
+        printf("    pop rdi\n");
+        printf("    pop rax\n");
+        printf("    cmp rax,rdi\n");
+        printf("    setl al\n");
+        printf("    movzb rax,al\n");
+    }else if(node->kind==ND_SHONARINARI){
+        gen(node->lhs);
+        gen(node->rhs);
+        printf("    pop rdi\n");
+        printf("    pop rax\n");
+        printf("    cmp rax,rdi\n");
+        printf("    setle al\n");
+        printf("    movzb rax,al\n");
+    }else if(node->kind==ND_DAINARI){
+        gen(node->lhs);
+        gen(node->rhs);
+        printf("    pop rdi\n");
+        printf("    pop rax\n");
+        printf("    cmp rdi,rax\n");
+        printf("    setl al\n");
+        printf("    movzb rax,al\n");
+    }else if(node->kind==ND_DAINARINARI){
+        gen(node->lhs);
+        gen(node->rhs);
+        printf("    pop rdi\n");
+        printf("    pop rax\n");
+        printf("    cmp rdi,rax\n");
+        printf("    setle al\n");
+        printf("    movzb rax,al\n");
     }
+
+
+
+
 
 }
 int main(int argc, char **argv) {
