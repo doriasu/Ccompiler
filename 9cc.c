@@ -17,6 +17,7 @@ struct Token {
   Token *next;
   int val;//kindがTK_NUMの時、その数値
   char *str;//トークン文字列
+  int len;//トークン文字列の長さ
 };
 //現在着目nowのトークン
 Token *token;
@@ -32,8 +33,8 @@ void error(char *fmt, ...) {
 }
 //次のトークンが期待している記号のときには、トークンを1強み勧めて
 //真を返す。それ以外は義を返す
-bool consume(char op){
-  if(token->kind!=TK_RESERVED||token->str[0]!=op){
+bool consume(char *op){
+  if(token->kind!=TK_RESERVED||strlen(op)!=token->len||memcmp(token->str,op,token->len)){
     return false;
   }
   token = token->next;
@@ -125,6 +126,7 @@ struct Node{
 Node* expr();
 Node* primary();
 Node* mul();
+Node* unary();
 Node* new_node(NodeKind kind,Node* lhs,Node* rhs){
     Node *node=calloc(1,sizeof(Node));
     node->lhs=lhs;
@@ -157,12 +159,12 @@ Node* expr(){
 }
 Node *mul(){
     //mul=primary('*'primary | '/'primary)*
-    Node* node=primary();
+    Node* node=unary();
     for(;;){
         if(consume('*')){
-            node=new_node(ND_MUL,node,primary());
+            node=new_node(ND_MUL,node,unary());
         }else if(consume('/')){
-            node=new_node(ND_DIV,node,primary());
+            node=new_node(ND_DIV,node,unary());
         }else{
             return node;
         }
@@ -177,6 +179,15 @@ Node* primary(){
         return node;
     }
     return new_node_num(expect_number());
+}
+Node* unary(){
+    if(consume('+')){
+        return primary();
+    }
+    if(consume('-')){
+        return new_node(ND_SUB,new_node_num(0),primary());
+    }
+    return primary();
 }
 //構文解析木を実際にスタックマシンで計算してみる
 void gen(Node *node){
