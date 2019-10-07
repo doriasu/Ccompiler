@@ -35,8 +35,6 @@ void error(char *fmt, ...) {
 //真を返す。それ以外は義を返す
 bool consume(char *op){
   if(token->kind!=TK_RESERVED||strlen(op)!=token->len||memcmp(token->str,op,token->len)){
-      printf("う%s\n",token->str);
-      printf("し%s\n",op);
     return false;
   }
   token = token->next;
@@ -69,7 +67,6 @@ Token *new_token(TokenKind kind, Token *cur, char *str,int len) {
   tok->kind = kind;
   tok -> str = str;
   tok->len=len;
-  printf("%s\n",str);
   return tok;
 }
 Token *tokenize(char *p) { 
@@ -88,7 +85,8 @@ Token *tokenize(char *p) {
     }
     if(*p=='>'){
         if(*(p+1)=='='){
-            cur=new_token(TK_RESERVED,cur,p+=2,2);
+            cur=new_token(TK_RESERVED,cur,p,2);
+            p+=2;
         }else{
             cur=new_token(TK_RESERVED,cur,p++,1);
         }
@@ -96,28 +94,34 @@ Token *tokenize(char *p) {
     }
     if(*p=='<'){
         if(*(p+1)=='='){
-            cur=new_token(TK_RESERVED,cur,p+=2,2);
+            cur=new_token(TK_RESERVED,cur,p,2);
+            p+=2;
         }else{
             cur=new_token(TK_RESERVED,cur,p++,1);
         }
         continue;
     }
     if(*p=='='&&*(p+1)=='='){
-        cur=new_token(TK_RESERVED,cur,p+=2,2);
+        cur=new_token(TK_RESERVED,cur,p,2);
+        p+=2;
         continue;
     }
      if(*p=='!'&&*(p+1)=='='){
-        cur=new_token(TK_RESERVED,cur,p+=2,2);
+        cur=new_token(TK_RESERVED,cur,p,2);
+        p+=2;
         continue;
     }
     if(isdigit(*p)){
       cur = new_token(TK_NUM, cur, p,1);
+      char *q=p;
       cur->val = strtol(p, &p, 10);
+      cur->len=p-q;
+      
       continue;
     }
     error("トークナイズできんが...");
   }
-  new_token(TK_EOF, cur, p,1);
+  new_token(TK_EOF, cur, p++,1);
   return head.next;
 }
 
@@ -157,6 +161,7 @@ struct Node{
     int val;
 };
 //ノード生成
+Node* equality();
 Node* expr();
 Node* relational();
 Node* add();
@@ -180,8 +185,11 @@ Node* new_node_num(int val){
     return node; 
     
 }
-//nodeの生成
 Node *expr(){
+    return equality();
+}
+//nodeの生成
+Node *equality(){
     //expr=relational("=="relational|"!="relational)
     Node* node=relational();
     for(;;){
@@ -251,10 +259,10 @@ Node* primary(){
 }
 Node* unary(){
     if(consume("+")){
-        return primary();
+        return unary();
     }
     if(consume("-")){
-        return new_node(ND_SUB,new_node_num(0),primary());
+        return new_node(ND_SUB,new_node_num(0),unary());
     }
     return primary();
 }
@@ -262,7 +270,6 @@ Node* unary(){
 void gen(Node *node){
     if(node->kind==ND_NUM){
         printf("    push %d\n",node->val);
-        return;
     }else if(node->kind==ND_ADD){
         gen(node->lhs);
         gen(node->rhs);
@@ -301,6 +308,8 @@ void gen(Node *node){
         printf("    cmp rax,rdi\n");
         printf("    sete al\n");
         printf("    movzb rax,al\n");
+        printf("    push rax\n");
+
     }else if(node->kind==ND_CHIGAU){
         gen(node->lhs);
         gen(node->rhs);
@@ -309,6 +318,8 @@ void gen(Node *node){
         printf("    cmp rax,rdi\n");
         printf("    setne al\n");
         printf("    movzb rax,al\n");
+        printf("    push rax\n");
+
     }else if(node->kind==ND_SHONARI){
         gen(node->lhs);
         gen(node->rhs);
@@ -317,6 +328,8 @@ void gen(Node *node){
         printf("    cmp rax,rdi\n");
         printf("    setl al\n");
         printf("    movzb rax,al\n");
+        printf("    push rax\n");
+
     }else if(node->kind==ND_SHONARINARI){
         gen(node->lhs);
         gen(node->rhs);
@@ -325,6 +338,8 @@ void gen(Node *node){
         printf("    cmp rax,rdi\n");
         printf("    setle al\n");
         printf("    movzb rax,al\n");
+        printf("    push rax\n");
+
     }else if(node->kind==ND_DAINARI){
         gen(node->lhs);
         gen(node->rhs);
@@ -333,6 +348,8 @@ void gen(Node *node){
         printf("    cmp rdi,rax\n");
         printf("    setl al\n");
         printf("    movzb rax,al\n");
+        printf("    push rax\n");
+
     }else if(node->kind==ND_DAINARINARI){
         gen(node->lhs);
         gen(node->rhs);
@@ -341,6 +358,8 @@ void gen(Node *node){
         printf("    cmp rdi,rax\n");
         printf("    setle al\n");
         printf("    movzb rax,al\n");
+        printf("    push rax\n");
+
     }
 
 
