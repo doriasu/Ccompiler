@@ -6,6 +6,7 @@
 #include<stdlib.h>
 typedef enum {
   TK_RESERVED,  //記号
+  TK_IDENT,//識別子
   TK_NUM,       //整数トークン
   TK_EOF,       //入力の終わりを表すトークン
 } TokenKind;
@@ -31,7 +32,9 @@ typedef enum{
     ND_DAINARINARI,//>=
     ND_SHONARI,//<
     ND_SHONARINARI,//<=
+    ND_LVAR,//aとか
     ND_NUM,
+    ND_ASSIGN//=
 }NodeKind;
 //ノードの構造
 typedef struct Node Node;
@@ -40,8 +43,10 @@ struct Node{
     Node *lhs;
     Node *rhs;
     int val;
+    int offset;
 };
 //現在着目nowのトークン
+extern Node* code[100];
 extern Token *token;
 extern char *user_input;//入力プログラム
 void error(char *fmt, ...);
@@ -51,3 +56,4 @@ void gen(Node *node);
 bool consume(char *op);
 int expect_number();
 void expect(char op);
+Token* consume_ident();

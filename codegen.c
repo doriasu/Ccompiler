@@ -1,12 +1,24 @@
 #include "9cc.h"
+Node* code[100];
 //ノード生成
 Node* equality();
+Node* assign();
 Node* expr();
+Node* stmt();
 Node* relational();
 Node* add();
 Node* primary();
 Node* mul();
 Node* unary();
+void program();
+void program(){
+    int i=0;
+    while(!at_eof()){
+        code[i++]=stmt();
+
+    }
+    code[i]=NULL;
+}
 Node* new_node(NodeKind kind,Node* lhs,Node* rhs){
     Node *node=calloc(1,sizeof(Node));
     node->lhs=lhs;
@@ -25,8 +37,22 @@ Node* new_node_num(int val){
     
 }
 Node *expr(){
-    return equality();
+    return assign();
 }
+Node* assign(){
+    Node *node=equality();
+    if(consume("=")){
+        node=new_node(ND_ASSIGN,node,assign());
+        return node;
+    }
+
+}
+Node* stmt(){
+    Node* node=expr();
+    expect(';');
+    return node;
+}
+
 //nodeの生成
 Node *equality(){
     //expr=relational("=="relational|"!="relational)
@@ -94,6 +120,15 @@ Node* primary(){
         expect(')');
         return node;
     }
+    //ここどうするよ
+    Token *tok=consume_ident();
+    if(tok){
+        Node*node=calloc(1,sizeof(Node));
+        node->kind=ND_LVAR;
+        node->offset=(tok->str[0]-'a'+1)*8;
+        return node;
+    }
+
     return new_node_num(expect_number());
 }
 Node* unary(){
@@ -106,9 +141,19 @@ Node* unary(){
     return primary();
 }
 //構文解析木を実際にスタックマシンで計算してみる
+void gen_lval(Node *node){
+    if(node->kind!=ND_LVAR){
+        error("代入の左辺値が変数じゃないけど???");
+
+    }
+    printf("    mov rax,rbp\n");
+    printf("    sub rax,%d\n",node->offset);
+    printf("    push rax\n");
+}
 void gen(Node *node){
     if(node->kind==ND_NUM){
         printf("    push %d\n",node->val);
+        return;
     }else if(node->kind==ND_ADD){
         gen(node->lhs);
         gen(node->rhs);
@@ -199,6 +244,20 @@ void gen(Node *node){
         printf("    movzb rax,al\n");
         printf("    push rax\n");
 
+    }else if(node->kind==ND_ASSIGN){
+        gen_lval(node->lhs);
+        gen(node->rhs);
+        printf("    pop rdi\n");
+        printf("    pop rax\n");
+        printf("    mov [rax],rdi\n");
+        printf("    push rdi\n");
+        return;
+    }else if(node->kind==ND_LVAR){
+        gen_lval(node);
+        printf("    pop rax\n");
+        printf("    mov rax,[rax]\n");
+        printf("    push rax\n");
+        return;
     }
 
 
