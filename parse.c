@@ -56,10 +56,11 @@ Token *new_token(TokenKind kind, Token *cur, char *str,int len) {
   tok->len=len;
   return tok;
 }
-Token *tokenize(char *p) { 
+Token *tokenize() { 
   Token head;
   head.next = NULL;
   Token *cur = &head;
+  char* p=user_input;
   while(*p){
     //空白の検出
     if(isspace(*p)){

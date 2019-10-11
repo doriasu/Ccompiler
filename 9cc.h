@@ -50,10 +50,12 @@ extern Node* code[100];
 extern Token *token;
 extern char *user_input;//入力プログラム
 void error(char *fmt, ...);
-Token *tokenize(char *p);
+Token *tokenize();
 Node* expr();
 void gen(Node *node);
 bool consume(char *op);
 int expect_number();
 void expect(char op);
 Token* consume_ident();
+void program();
+bool at_eof();
