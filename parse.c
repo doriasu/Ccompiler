@@ -13,6 +13,7 @@ void error(char *fmt, ...) {
 //次のトークンが期待している記号のときには、トークンを1強み勧めて
 //真を返す。それ以外は義を返す
 bool consume(char *op){
+	printf("%s:%ld\n",op,strlen(op));
   if(token->kind!=TK_RESERVED||strlen(op)!=token->len||memcmp(token->str,op,token->len)){
     return false;
   }
@@ -111,6 +112,10 @@ Token *tokenize() {
         cur=new_token(TK_IDENT,cur,p++,1);
         cur->len=1;
         continue;
+    }
+    if(ispunct(*p)){
+	    cur=new_token(TK_RESERVED,cur,p++,1);
+	    continue;
     }
     error("トークナイズできんが...");
   }
