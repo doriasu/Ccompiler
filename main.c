@@ -5,6 +5,7 @@ int main(int argc, char **argv) {
     error("引数の個数が正しくありません。");
     return 1;
   }
+  locals=malloc(sizeof(LVar));
   user_input = argv[1];
   token=tokenize();
   program();

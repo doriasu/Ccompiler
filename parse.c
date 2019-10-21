@@ -108,9 +108,15 @@ Token *tokenize() {
       continue;
     }
     if('a'<=*p&&*p<='z'){
-        cur=new_token(TK_IDENT,cur,p++,1);
-        cur->len=1;
-        continue;
+		char *tmp=p;
+		int sum=0;
+		for(;'a'<=*tmp&&*tmp<='z';tmp++){
+			sum++;
+		}
+	        cur=new_token(TK_IDENT,cur,p,sum);
+			p+=sum;
+		    cur->len=sum;
+			continue;
     }
     if(ispunct(*p)){
 	    cur=new_token(TK_RESERVED,cur,p++,1);
@@ -134,3 +140,4 @@ void error_at(char *loc, char *fmt, ...) {
   fprintf(stderr, "\n");
   exit(1);
 }
+

@@ -11,6 +11,17 @@ Node* primary();
 Node* mul();
 Node* unary();
 void program();
+//変数を名前で検索する。見つからなかった場合はNULLを返す。
+LVar *find_lvar(Token *tok){
+	for(LVar *var=locals;var;var=var->next){
+		if(var->len==tok->len&&!memcmp(tok->str,var->name,var->len)){
+			return var;
+		}	
+	}
+	return NULL;
+
+    
+	}
 void program(){
     int i=0;
     while(!at_eof()){
@@ -123,10 +134,23 @@ Node* primary(){
     //ここどうするよ
     Token *tok=consume_ident();
     if(tok){
-        Node*node=calloc(1,sizeof(Node));
-        node->kind=ND_LVAR;
-        node->offset=(tok->str[0]-'a'+1)*8;
-        return node;
+		Node *node=calloc(1,sizeof(Node));
+		node->kind=ND_LVAR;
+		LVar *lvar=find_lvar(tok);
+		if(lvar){
+				node->offset=lvar->offset;
+		}else{
+				lvar=calloc(1,sizeof(LVar));
+				lvar->next=locals;
+				lvar->name=tok->str;
+				lvar->len=tok->len;
+				lvar->offset=locals->offset+8;
+				node->offset=lvar->offset;
+				locals=lvar;
+
+		}
+		return node;
+
     }
 
     return new_node_num(expect_number());

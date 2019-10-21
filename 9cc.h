@@ -36,7 +36,16 @@ typedef enum{
     ND_NUM,
     ND_ASSIGN//=
 }NodeKind;
-//ノードの構造
+//ノードの構
+typedef struct LVar LVar;
+struct LVar{
+	struct LVar *next;//次の変数かNULL
+	char* name;//変数名
+	int len;//長さ
+	int offset;//RBPからのオフセット
+};
+//ローカル変数
+LVar* locals;
 typedef struct Node Node;
 struct Node{
     NodeKind kind;
