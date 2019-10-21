@@ -59,9 +59,22 @@ Node* assign(){
 
 }
 Node* stmt(){
-    Node* node=expr();
-    expect(';');
-    return node;
+	Node *node;
+	if(token->kind==TK_RETURN){
+		node=calloc(1,sizeof(Node));
+		node->kind=ND_RETURN;
+		token=token->next;
+		node->lhs=expr();
+
+	}else{
+		node=expr();
+	}
+	if(!consume(";")){
+		perror(";ではないトークンです");
+
+	}
+	return node;
+
 }
 
 //nodeの生成
@@ -175,7 +188,15 @@ void gen_lval(Node *node){
     printf("    push rax\n");
 }
 void gen(Node *node){
-    if(node->kind==ND_NUM){
+	if(node->kind==ND_RETURN){
+		gen(node->lhs);
+		printf("	pop rax\n");
+		printf("	mov rsp,rbp\n");
+		printf("	pop rbp\n");
+		printf("	ret\n");
+		return;
+	}
+    else if(node->kind==ND_NUM){
         printf("    push %d\n",node->val);
         return;
     }else if(node->kind==ND_ADD){
