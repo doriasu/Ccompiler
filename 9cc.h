@@ -12,7 +12,8 @@ typedef enum {
   TK_RETURN,//returnを表すトークン
   TK_IF,
   TK_WHILE,
-  TK_FOR
+  TK_FOR,
+  TK_ELSE
 } TokenKind;
 typedef struct Token Token;
 //うえの定義の中身
@@ -42,7 +43,8 @@ typedef enum{
 	ND_RETURN,
 	ND_IF,
 	ND_WHILE,
-	ND_FOR
+	ND_FOR,
+	ND_ELSE
 }NodeKind;
 //ノードの構
 typedef struct LVar LVar;
@@ -59,6 +61,10 @@ struct Node{
     NodeKind kind;
     Node *lhs;
     Node *rhs;
+	//if用
+	Node *cond;
+	Node *then;
+	Node *els;
     int val;
     int offset;
 };

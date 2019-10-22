@@ -60,7 +60,23 @@ Node* assign(){
 }
 Node* stmt(){
 	Node *node;
-	if(token->kind==TK_RETURN){
+	if(token->kind==TK_IF){
+		node=calloc(1,sizeof(Node));
+		node->kind=ND_IF;
+		node->els=NULL;
+		token=token->next;
+		expect('(');
+		node->cond=expr();
+		expect(')');
+		node->then=stmt();
+		if(token->kind==TK_ELSE){
+		node->els=stmt();
+	}
+		return node;
+
+	}
+	
+	else if(token->kind==TK_RETURN){
 		node=calloc(1,sizeof(Node));
 		node->kind=ND_RETURN;
 		token=token->next;
@@ -303,10 +319,24 @@ void gen(Node *node){
         printf("    mov rax,[rax]\n");
         printf("    push rax\n");
         return;
-    }
+    }else if(node->kind==ND_IF){
+
+		gen(node->cond);
+		printf("	pop rax\n");
+		printf("	cmp rax,0\n");
+		printf("	je .LendXXX\n");
+		gen(node->then);
+		//printf("	jmp .Lendxxx\n");
+		//printf(".LelseXXX:\n");
+		if(node->els){	
+		gen(node->els);}
+		printf(".LendXXX:\n");
+
+
+	}
+	}
 
 
 
 
 
-}

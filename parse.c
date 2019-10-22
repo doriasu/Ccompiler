@@ -87,6 +87,11 @@ Token *tokenize() {
 		p+=3;
 		continue;
 	}
+	if(strncmp(p,"else",4)==0&&!is_alnum(p[4])){
+		cur=new_token(TK_ELSE,cur,p,4);
+		p+=4;
+		continue;
+	}
 	  //空白の検出
     if(isspace(*p)){
       p++;
