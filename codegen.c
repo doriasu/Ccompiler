@@ -71,6 +71,7 @@ Node* stmt(){
 
 		}else{
 			node->definition=expr();
+			expect(';');
 
 		}
 		if(token->len==1&&strncmp(token->str,";",1)==0){
@@ -79,6 +80,7 @@ Node* stmt(){
 
 		}else{
 			node->cond=expr();
+			expect(';');
 
 		}
 		if(token->len==1&&strncmp(token->str,")",1)==0){
@@ -396,6 +398,26 @@ void gen(Node *node){
 		gen(node->then);
 		printf("	jmp .Lbeginwhile\n");
 		printf(".Lendwhile:\n");
+
+	}else if(node->kind==ND_FOR){
+		if(node->definition){
+			gen(node->definition);
+		}
+		printf(".Lbeginfor:\n");
+		if(node->cond){
+			gen(node->cond);
+		}
+		printf("	pop rax\n");
+		printf("	cmp rax,0\n");
+		printf("	je .Lendfor\n");
+		if(node->then){
+			gen(node->then);
+		}
+		if(node->update){
+			gen(node->update);
+		}
+		printf("	jmp .Lbeginfor\n");
+		printf(".Lendfor:\n");
 
 	}
 	}

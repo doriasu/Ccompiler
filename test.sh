@@ -52,4 +52,6 @@ try 2 'if(2-1)return 2;else return 3;'
 try 3 'if(0)return 5;else return 3;'
 try 3 'a=1;b=1;if(a==b)return 1+2;return 4;'
 try 5 'a=0;while(a<5)a=a+1;return a;'
+try 55 'i=0; j=0; for (i=0; i<=10; i=i+1) j=i+j; return j;'
+try 3 'for (;;) return 3; return 5;'
 echo OK
