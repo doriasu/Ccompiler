@@ -60,10 +60,23 @@ Node* assign(){
 }
 Node* stmt(){
 	Node *node;
-	if(token->kind==TK_IF){
+	if(token->kind==TK_WHILE){
+		node=calloc(1,sizeof(Node));
+		node->kind=ND_WHILE;
+		token=token->next;
+		expect('(');
+		node->cond=expr();
+		expect(')');
+		node->then=stmt();
+		return node;
+
+
+
+	}
+	else if(token->kind==TK_IF){
 		node=calloc(1,sizeof(Node));
 		node->kind=ND_IF;
-		node->els=NULL;
+		//node->els=NULL;
 		token=token->next;
 		expect('(');
 		node->cond=expr();
