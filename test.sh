@@ -48,6 +48,7 @@ try 6 'foo=3;bar=3;foo+bar;'
 
 try 3 'a=3;return a;'
 try 8 'a=3;b=5;return a+b;'
+try 2 'if(2-1)return 2;else return 3;'
+try 3 'if(0)return 5;else return 3;'
 try 3 'a=1;b=1;if(a==b)return 1+2;return 4;'
-try 4 'a=2;b=3;if(a==b)return 3;return 4;'
 echo OK

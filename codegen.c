@@ -70,6 +70,8 @@ Node* stmt(){
 		expect(')');
 		node->then=stmt();
 		if(token->kind==TK_ELSE){
+
+		token=token->next;
 		node->els=stmt();
 	}
 		return node;
@@ -206,10 +208,10 @@ void gen_lval(Node *node){
 void gen(Node *node){
 	if(node->kind==ND_RETURN){
 		gen(node->lhs);
-		printf("	pop rax\n");
-		printf("	mov rsp,rbp\n");
-		printf("	pop rbp\n");
-		printf("	ret\n");
+		printf("    pop rax\n");
+		//printf("    mov rsp,rbp\n");
+		//printf("    pop rbp\n");
+		printf("    jmp .LendXXX\n");
 		return;
 	}
     else if(node->kind==ND_NUM){
@@ -322,16 +324,19 @@ void gen(Node *node){
     }else if(node->kind==ND_IF){
 
 		gen(node->cond);
-		printf("	pop rax\n");
-		printf("	cmp rax,0\n");
-		printf("	je .LendXXX\n");
+		printf("    pop rax\n");
+		printf("    cmp rax,0\n");
+		if(!node->els){
+		printf("    je .LendXXX\n");
+		}else{
+			printf("    je .LelseXXX\n");
+		}
 		gen(node->then);
-		//printf("	jmp .Lendxxx\n");
-		//printf(".LelseXXX:\n");
-		if(node->els){	
+		if(node->els){
+		printf("    jmp .LendXXX\n");
+		printf(".LelseXXX:\n");	
 		gen(node->els);}
-		printf(".LendXXX:\n");
-
+		
 
 	}
 	}

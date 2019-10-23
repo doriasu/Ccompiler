@@ -23,10 +23,12 @@ int main(int argc, char **argv) {
   for(int i=0;code[i];i++){
 	  gen(code[i]);
 	  //式の評価結果としてスタックに一つ値が残っているので、スタックが溢れないようにpop
-	  printf("	pop rax\n");
+	 printf("	pop rax\n");
   }
 
   //スタックトップに式全体の値が有るよ〜
+
+  printf(".LendXXX:\n");
   printf("	mov rsp,rbp\n");
   printf("	pop rbp\n");
   printf("  ret\n");
