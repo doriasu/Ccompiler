@@ -61,10 +61,12 @@ struct Node{
     NodeKind kind;
     Node *lhs;
     Node *rhs;
-	//if用
-	Node *cond;
-	Node *then;
-	Node *els;
+	//if、while、for
+	Node *cond;//条件文
+	Node *then;//条件を満たした後に実行する文
+	Node *els;//elseの場合に実行する文
+	Node *definition;//forの定義文用
+	Node *update;//for更新用の文
     int val;
     int offset;
 };

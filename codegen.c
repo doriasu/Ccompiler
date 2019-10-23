@@ -60,7 +60,43 @@ Node* assign(){
 }
 Node* stmt(){
 	Node *node;
-	if(token->kind==TK_WHILE){
+	if(token->kind==TK_FOR){
+		node=calloc(1,sizeof(Node));
+		node->kind=ND_FOR;
+		token=token->next;
+		expect('(');
+		if(token->len==1&&strncmp(token->str,";",1)==0){
+			node->definition=NULL;
+			token=token->next;
+
+		}else{
+			node->definition=expr();
+
+		}
+		if(token->len==1&&strncmp(token->str,";",1)==0){
+			node->cond=NULL;
+			token=token->next;
+
+		}else{
+			node->cond=expr();
+
+		}
+		if(token->len==1&&strncmp(token->str,")",1)==0){
+			node->update=NULL;
+			expect(')');
+
+		}else{
+			node->update=expr();
+			expect(')');
+
+		}
+		node->then=stmt();
+		return node;
+
+
+
+	}
+	else if(token->kind==TK_WHILE){
 		node=calloc(1,sizeof(Node));
 		node->kind=ND_WHILE;
 		token=token->next;
