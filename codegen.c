@@ -351,6 +351,16 @@ void gen(Node *node){
 		gen(node->els);}
 		
 
+	}else if(node->kind==ND_WHILE){
+		printf(".Lbeginwhile:\n");
+		gen(node->cond);
+		printf("	pop rax\n");
+		printf("	cmp rax,0\n");
+		printf("	je .Lendwhile\n");
+		gen(node->then);
+		printf("	jmp .Lbeginwhile\n");
+		printf(".Lendwhile:\n");
+
 	}
 	}
 
