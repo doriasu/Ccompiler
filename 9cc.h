@@ -13,7 +13,10 @@ typedef enum {
   TK_IF,
   TK_WHILE,
   TK_FOR,
-  TK_ELSE
+  TK_ELSE,
+  TK_KAKKOLEFT,//{
+  TK_KAKKORIGHT,//}
+
 } TokenKind;
 typedef struct Token Token;
 //うえの定義の中身
@@ -44,7 +47,9 @@ typedef enum{
 	ND_IF,
 	ND_WHILE,
 	ND_FOR,
-	ND_ELSE
+	ND_ELSE,
+	ND_KAKKOLEFT,
+	ND_KAKKORIGHT
 }NodeKind;
 //ノードの構
 typedef struct LVar LVar;
