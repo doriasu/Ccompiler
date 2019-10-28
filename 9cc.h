@@ -72,6 +72,7 @@ struct Node{
 	Node *els;//elseの場合に実行する文
 	Node *definition;//forの定義文用
 	Node *update;//for更新用の文
+	Node *kakko;//{}用
     int val;
     int offset;
 };

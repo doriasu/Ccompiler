@@ -54,4 +54,13 @@ try 3 'a=1;b=1;if(a==b)return 1+2;return 4;'
 try 5 'a=0;while(a<5)a=a+1;return a;'
 try 55 'i=0; j=0; for (i=0; i<=10; i=i+1) j=i+j; return j;'
 try 3 'for (;;) return 3; return 5;'
+try 2 'if(0)return 5;return 2;'
+try 3 'a=1;b=3;if(0){a=a+4;return a;}return b;'
+try 5 'a=1;for(;a<5;a=a+1){b=2;c=3;d=4;}return a;'
+try 2 'a=1;while(a<10){a=a+1;return a;}'
+try 3 '{1; {2;} return 3;}'
+try 10 'i=0; while(i<10) i=i+1; return i;'
+try 55 'i=0; j=0; while(i<=10) {j=i+j; i=i+1;} return j;'
+try 55 'i=0; j=0; for (i=0; i<=10; i=i+1) j=i+j; return j;'
+
 echo OK

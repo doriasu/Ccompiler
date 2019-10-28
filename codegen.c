@@ -60,7 +60,21 @@ Node* assign(){
 }
 Node* stmt(){
 	Node *node;
-	if(token->kind==TK_FOR){
+	if(token->kind==TK_KAKKOLEFT){
+		node=calloc(1,sizeof(Node));
+		node->kind=ND_KAKKOLEFT;
+		token=token->next;
+		Node* move=node;
+		while(token->kind!=TK_KAKKORIGHT){
+			move->kakko=stmt();
+			move=move->kakko;
+		}
+		token=token->next;
+		move->kakko=NULL;
+		return node;
+
+	}
+	else if(token->kind==TK_FOR){
 		node=calloc(1,sizeof(Node));
 		node->kind=ND_FOR;
 		token=token->next;
@@ -373,20 +387,20 @@ void gen(Node *node){
         printf("    push rax\n");
         return;
     }else if(node->kind==ND_IF){
-
 		gen(node->cond);
 		printf("    pop rax\n");
 		printf("    cmp rax,0\n");
 		if(!node->els){
-		printf("    je .LendXXX\n");
+		printf("    je .Lendif\n");
 		}else{
 			printf("    je .LelseXXX\n");
 		}
 		gen(node->then);
 		if(node->els){
-		printf("    jmp .LendXXX\n");
+		printf("    jmp .Lendif\n");
 		printf(".LelseXXX:\n");	
 		gen(node->els);}
+		printf(".Lendif:\n");
 		
 
 	}else if(node->kind==ND_WHILE){
@@ -419,6 +433,14 @@ void gen(Node *node){
 		printf("	jmp .Lbeginfor\n");
 		printf(".Lendfor:\n");
 
+	}else if(node->kind==ND_KAKKOLEFT){
+		//{}用のエンドジャンプラベルがひつようそう???多分gen(node->kakko)のwhileの後に作る？？？if文のLendxxxのバグが頭おかしいほかは大丈夫そうか←そもそも数字で管理する必要は有ると思われ
+		while(node->kakko){
+			gen(node->kakko);
+			node=node->kakko;
+			printf("	pop rax\n");
+			
+		}
 	}
 	}
 
