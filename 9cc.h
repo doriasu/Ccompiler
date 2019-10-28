@@ -79,6 +79,7 @@ struct Node{
 //現在着目nowのトークン
 extern Node* code[100];
 extern Token *token;
+extern int block;
 extern char *user_input;//入力プログラム
 void error(char *fmt, ...);
 Token *tokenize();

@@ -1,6 +1,7 @@
 #include "9cc.h"
 char *user_input;//入力プログラム
 int main(int argc, char **argv) {
+	block=0;
   if (argc != 2) {
     error("引数の個数が正しくありません。");
     return 1;

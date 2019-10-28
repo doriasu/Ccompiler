@@ -1,5 +1,6 @@
 #include "9cc.h"
 Node* code[100];
+int block;
 //ノード生成
 Node* equality();
 Node* assign();
@@ -391,47 +392,50 @@ void gen(Node *node){
 		printf("    pop rax\n");
 		printf("    cmp rax,0\n");
 		if(!node->els){
-		printf("    je .Lendif\n");
+		printf("    je .Lendif%d\n",block);
 		}else{
-			printf("    je .LelseXXX\n");
+			printf("    je .LelseXXX%d\n",block);
 		}
 		gen(node->then);
 		if(node->els){
-		printf("    jmp .Lendif\n");
-		printf(".LelseXXX:\n");	
+		printf("    jmp .Lendif%d\n",block);
+		printf(".LelseXXX%d:\n",block);	
 		gen(node->els);}
-		printf(".Lendif:\n");
+		printf(".Lendif%d:\n",block);
+		block++;
 		
 
 	}else if(node->kind==ND_WHILE){
-		printf(".Lbeginwhile:\n");
+		printf(".Lbeginwhile%d:\n",block);
 		gen(node->cond);
 		printf("	pop rax\n");
 		printf("	cmp rax,0\n");
-		printf("	je .Lendwhile\n");
+		printf("	je .Lendwhile%d\n",block);
 		gen(node->then);
-		printf("	jmp .Lbeginwhile\n");
-		printf(".Lendwhile:\n");
+		printf("	jmp .Lbeginwhile%d\n",block);
+		printf(".Lendwhile%d:\n",block);
+		block++;
 
 	}else if(node->kind==ND_FOR){
 		if(node->definition){
 			gen(node->definition);
 		}
-		printf(".Lbeginfor:\n");
+		printf(".Lbeginfor%d:\n",block);
 		if(node->cond){
 			gen(node->cond);
 		}
 		printf("	pop rax\n");
 		printf("	cmp rax,0\n");
-		printf("	je .Lendfor\n");
+		printf("	je .Lendfor%d\n",block);
 		if(node->then){
 			gen(node->then);
 		}
 		if(node->update){
 			gen(node->update);
 		}
-		printf("	jmp .Lbeginfor\n");
-		printf(".Lendfor:\n");
+		printf("	jmp .Lbeginfor%d\n",block);
+		printf(".Lendfor%d:\n",block);
+		block++;
 
 	}else if(node->kind==ND_KAKKOLEFT){
 		//{}用のエンドジャンプラベルがひつようそう???多分gen(node->kakko)のwhileの後に作る？？？if文のLendxxxのバグが頭おかしいほかは大丈夫そうか←そもそも数字で管理する必要は有ると思われ
