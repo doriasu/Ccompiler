@@ -77,6 +77,12 @@ struct Node{
     int val;
     int offset;
 	char* funcname;
+	Node *hikisuu1;
+	Node *hikisuu2;
+	Node *hikisuu3;
+	Node *hikisuu4;
+	Node *hikisuu5;
+	Node *hikisuu6;
 };
 //現在着目nowのトークン
 extern Node* code[100];

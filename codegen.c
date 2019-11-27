@@ -243,6 +243,57 @@ Node* primary(){
 				node->funcname=malloc(100);
 				strncpy(node->funcname,tok->str,tok->len);
 				token=token->next;
+				while(1){
+					if(strncmp(token->str,")",1)==0){
+						break;
+					}
+					Node* node1=primary();
+					node->hikisuu1=node1;
+					if(strncmp(token->str,",",1)!=0){
+						continue;
+					}
+					token=token->next;
+
+					Node* node2=primary();
+					node->hikisuu2=node2;
+					if(strncmp(token->str,",",1)!=0){
+						continue;
+					}
+					token=token->next;
+
+					Node* node3=primary();
+					node->hikisuu3=node3;
+					if(strncmp(token->str,",",1)!=0){
+						continue;
+					}
+					token=token->next;
+
+					Node* node4=primary();
+					node->hikisuu4=node4;
+					if(strncmp(token->str,",",1)!=0){
+						continue;
+					}
+					token=token->next;
+
+					Node* node5=primary();
+					node->hikisuu5=node5;
+					if(strncmp(token->str,",",1)!=0){
+						continue;
+					}
+					token=token->next;
+
+					Node* node6=primary();
+					node->hikisuu6=node6;
+					if(strncmp(token->str,",",1)!=0){
+						continue;
+					}
+					token=token->next;
+
+
+
+
+
+				}
 				expect(')');
 
 
