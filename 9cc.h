@@ -49,7 +49,8 @@ typedef enum{
 	ND_FOR,
 	ND_ELSE,
 	ND_KAKKOLEFT,
-	ND_KAKKORIGHT
+	ND_KAKKORIGHT,
+	ND_FUNCTION
 }NodeKind;
 //ノードの構
 typedef struct LVar LVar;
@@ -75,6 +76,7 @@ struct Node{
 	Node *kakko;//{}用
     int val;
     int offset;
+	char* funcname;
 };
 //現在着目nowのトークン
 extern Node* code[100];

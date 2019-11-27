@@ -237,13 +237,24 @@ Node* primary(){
 		if(lvar){
 				node->offset=lvar->offset;
 		}else{
+			if(strncmp(token->str,"(",1)==0){
+
+				node->kind=ND_FUNCTION;
+				node->funcname=malloc(100);
+				strncpy(node->funcname,tok->str,tok->len);
+				token=token->next;
+				expect(')');
+
+
+
+			}else{
 				lvar=calloc(1,sizeof(LVar));
 				lvar->next=locals;
 				lvar->name=tok->str;
 				lvar->len=tok->len;
 				lvar->offset=locals->offset+8;
 				node->offset=lvar->offset;
-				locals=lvar;
+				locals=lvar;}
 
 		}
 		return node;
@@ -445,6 +456,9 @@ void gen(Node *node){
 			printf("	pop rax\n");
 			
 		}
+	}else if(node->kind==ND_FUNCTION){
+		printf("    call %s\n",node->funcname);
+		printf("    push rax\n");
 	}
 	}
 
