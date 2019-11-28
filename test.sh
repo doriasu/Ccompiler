@@ -2,6 +2,7 @@
 cat <<EOF | gcc -xc -c -o tmp2.o -
 int ret() { return 3; }
 int rett() { return 5; }
+int rethiki(int a,int b){return a+b;}
 EOF
 try() {
   expected="$1"
@@ -68,4 +69,5 @@ try 55 'i=0; j=0; while(i<=10) {j=i+j; i=i+1;} return j;'
 try 55 'i=0; j=0; for (i=0; i<=10; i=i+1) j=i+j; return j;'
 try 3 'return ret();'
 try 5 'return rett();'
+try 8 'return rethiki(3,5);'
 echo OK

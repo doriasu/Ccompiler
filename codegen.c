@@ -247,42 +247,42 @@ Node* primary(){
 					if(strncmp(token->str,")",1)==0){
 						break;
 					}
-					Node* node1=primary();
+					Node* node1=expr();
 					node->hikisuu1=node1;
 					if(strncmp(token->str,",",1)!=0){
 						continue;
 					}
 					token=token->next;
 
-					Node* node2=primary();
+					Node* node2=expr();
 					node->hikisuu2=node2;
 					if(strncmp(token->str,",",1)!=0){
 						continue;
 					}
 					token=token->next;
 
-					Node* node3=primary();
+					Node* node3=expr();
 					node->hikisuu3=node3;
 					if(strncmp(token->str,",",1)!=0){
 						continue;
 					}
 					token=token->next;
 
-					Node* node4=primary();
+					Node* node4=expr();
 					node->hikisuu4=node4;
 					if(strncmp(token->str,",",1)!=0){
 						continue;
 					}
 					token=token->next;
 
-					Node* node5=primary();
+					Node* node5=expr();
 					node->hikisuu5=node5;
 					if(strncmp(token->str,",",1)!=0){
 						continue;
 					}
 					token=token->next;
 
-					Node* node6=primary();
+					Node* node6=expr();
 					node->hikisuu6=node6;
 					if(strncmp(token->str,",",1)!=0){
 						continue;
@@ -508,6 +508,42 @@ void gen(Node *node){
 			
 		}
 	}else if(node->kind==ND_FUNCTION){
+		if(node->hikisuu1){
+			gen(node->hikisuu1);
+			printf("	pop rax\n");
+			printf("	mov rdi,rax\n");
+
+		}
+		if(node->hikisuu2){
+			gen(node->hikisuu2);
+			printf("	pop rax\n");
+			printf("	mov rsi,rax\n");
+
+		}
+		if(node->hikisuu3){
+			gen(node->hikisuu3);
+			printf("	pop rax\n");
+			printf("	mov rdx,rax\n");
+
+		}
+		if(node->hikisuu4){
+			gen(node->hikisuu4);
+			printf("	pop rax\n");
+			printf("	mov rcx,rax\n");
+
+		}
+		if(node->hikisuu5){
+			gen(node->hikisuu5);
+			printf("	pop rax\n");
+			printf("	mov r8,rax\n");
+
+		}
+		if(node->hikisuu6){
+			gen(node->hikisuu6);
+			printf("	pop rax\n");
+			printf("	mov r9,rax\n");
+
+		}
 		printf("    call %s\n",node->funcname);
 		printf("    push rax\n");
 	}
