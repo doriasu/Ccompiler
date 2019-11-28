@@ -508,6 +508,11 @@ void gen(Node *node){
 			
 		}
 	}else if(node->kind==ND_FUNCTION){
+		printf("	mov rax,rsp\n");
+		printf("	and rax,15\n");
+		printf("	xor rax,15\n");
+		printf("	add rsp,rax\n");
+
 		if(node->hikisuu1){
 			gen(node->hikisuu1);
 			printf("	pop rax\n");
@@ -544,6 +549,7 @@ void gen(Node *node){
 			printf("	mov r9,rax\n");
 
 		}
+
 		printf("    call %s\n",node->funcname);
 		printf("    push rax\n");
 	}
