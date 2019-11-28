@@ -511,7 +511,8 @@ void gen(Node *node){
 		printf("	mov rax,rsp\n");
 		printf("	and rax,15\n");
 		printf("	xor rax,15\n");
-		printf("	add rsp,rax\n");
+		//printf("	add rsp,rax\n");
+		printf("	push rax\n");
 
 		if(node->hikisuu1){
 			gen(node->hikisuu1);
@@ -549,8 +550,18 @@ void gen(Node *node){
 			printf("	mov r9,rax\n");
 
 		}
-
+		printf("	pop rax\n");
+		printf("	cmp rax,0\n");
+		printf("	jz .Idousuru%s\n",node->funcname);
+		printf("	sub rsp,8\n");
+		printf("	mov rax,0\n");
+		printf("	call %s\n",node->funcname);
+		printf("	add rsp,8\n");
+		printf("	jmp .Lastsuru%s\n",node->funcname);
+		printf(".Idousuru%s:\n",node->funcname);
+		printf("	mov rax,0\n");
 		printf("    call %s\n",node->funcname);
+		printf(".Lastsuru%s:\n",node->funcname);
 		printf("    push rax\n");
 	}
 	}
