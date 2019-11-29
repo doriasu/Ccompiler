@@ -83,6 +83,8 @@ struct Node{
 	Node *hikisuu4;
 	Node *hikisuu5;
 	Node *hikisuu6;
+	int func_definition;
+	Node *func;
 };
 //現在着目nowのトークン
 extern Node* code[100];

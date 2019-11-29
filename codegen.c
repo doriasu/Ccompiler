@@ -295,6 +295,10 @@ Node* primary(){
 
 				}
 				expect(')');
+				if(strncmp(token->str,"{",1)==0){
+					node->func_definition=1;
+					node->func=stmt();
+				}
 
 
 
